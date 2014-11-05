@@ -1,0 +1,1393 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Tests &amp; Coverage</title>
+    <script>
+      headings = [];
+
+      onload = function () {
+          headings = document.querySelectorAll('h2');
+          reset();
+      };
+
+      onscroll = function (e) {
+          var heading = find(window.scrollY);
+          if (!heading) return;
+          var links = document.querySelectorAll('#menu a')
+                  , link;
+
+          for (var i = 0, len = links.length; i < len; ++i) {
+              link = links[i];
+              link.className = link.getAttribute('href') == '#' + heading.id ? 'active' : '';
+          }
+      };
+
+      function find (y) {
+          var i = headings.length
+                  , heading;
+
+          while (i--) {
+              heading = headings[i];
+              if (y >= heading.offsetTop) {
+                  return heading;
+              }
+          }
+      }
+
+      function toggle (className) {
+
+          var elements = document.getElementsByClassName(className);
+
+          for (var i = 0, il = elements.length; i < il; ++i) {
+              var element = elements[i];
+
+              if (element.classList.contains('hide')) {
+                  element.classList.remove('hide');
+                  element.classList.add('show');
+              }
+              else {
+                  element.classList.remove('show');
+                  element.classList.add('hide');
+              }
+          };
+      }
+
+      function reset () {
+
+          var shownElements = document.getElementsByClassName('show');
+          var filterElements = document.querySelectorAll('input[type=checkbox]');
+
+          for (var i = 0, il = filterElements.length; i < il; ++i) {
+              filterElements[i].checked = false;
+          }
+
+          // Check any filters with visible elements
+          for (i = 0, il = shownElements.length; i < il; ++i) {
+              var shownElement = shownElements[i];
+              var classNames = shownElement.className.split(' ');
+              for (var ci = 0, cl = classNames.length; ci < cl; ++ci){
+                  var element = document.getElementById('show-' + classNames[ci]);
+                  if (element) {
+                      element.checked = true;
+                  }
+              }
+          }
+      };
+
+      function filter (element) {
+
+          toggle(element.value);
+          reset();
+      }
+    </script>
+    <style>
+    body {
+        font: 14px/1.6 Helvetica, Arial, sans-serif;
+        margin: 0;
+        color: #2c2c2c;
+    }
+
+    #coverage {
+        padding: 60px;
+    }
+
+    h1 a:hover {
+        text-decoration: none;
+    }
+
+    h2 {
+        width: 80%;
+        margin-top: 80px;
+        margin-bottom: 0;
+        font-weight: 100;
+        letter-spacing: 1px;
+    }
+
+    ul {
+        margin-top: 20px;
+        padding: 0 15px;
+        width: 100%;
+    }
+
+    ul li {
+        float: left;
+        width: 40%;
+        margin-top: 5px;
+        margin-right: 60px;
+        list-style: none;
+        padding: 5px 0;
+        font-size: 12px;
+    }
+
+    #menu {
+        position: fixed;
+        font-size: 12px;
+        overflow-y: auto;
+        top: 0;
+        right: 0;
+        margin: 0;
+        height: 100%;
+        padding: 15px 15px;
+        border-left: 1px solid #eee;
+        background-color: #666;
+    }
+
+    #menu::after {
+        display: block;
+        content: '';
+        padding-top: 80px;
+    }
+
+    #menu li a {
+        display: block;
+        color: white;
+        padding: 0 5px 0 35px;
+        transition: background 300ms;
+        text-decoration: none;
+    }
+
+    #menu li {
+        position: relative;
+        list-style: none;
+    }
+
+    #menu a:hover,
+    #menu a.active {
+        text-decoration: none;
+        background: rgba(255,255,255,.4);
+    }
+
+    #menu li:hover .cov {
+        opacity: 1;
+    }
+
+    #menu li .dirname {
+        opacity: .60;
+        padding-right: 2px;
+    }
+
+    #menu li .basename {
+        opacity: 1;
+    }
+
+    #menu .cov {
+        background: rgba(0,0,0,.3);
+        position: absolute;
+        top: 0;
+        font-size: 9px;
+        text-align: center;
+        opacity: .8;
+        width: 22px;
+        border-radius: 10px;
+        padding: 2px 3px;
+    }
+
+    #files .stats:nth-child(2n) {
+        display: inline-block;
+        margin-top: 15px;
+        border: 1px solid #eee;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .stats div {
+        float: left;
+        padding: 0 5px;
+    }
+
+    .stats::after {
+        display: block;
+        content: '';
+        clear: both;
+    }
+
+    .stats .sloc::after {
+        content: ' SLOC';
+        color: #b6b6b6;
+    }
+
+    .stats .percentage::after {
+        content: ' coverage';
+        color: #b6b6b6;
+    }
+
+    .stats .hits::before {
+        content: '(';
+        color: #b6b6b6;
+    }
+
+    .stats .hits::after {
+        content: ' Covered';
+        color: #b6b6b6;
+    }
+
+    .stats .misses::after {
+        content: ' Not Covered)';
+        color: #b6b6b6;
+    }
+
+    .stats .failures::after {
+        content: ' Failures';
+        color: #b6b6b6;
+    }
+
+    .stats .skipped::after {
+        content: ' Skipped';
+        color: #b6b6b6;
+    }
+
+    .stats .test-count::after {
+        content: ' Tests';
+        color: #b6b6b6;
+    }
+
+    .stats .duration::before {
+        content: '(';
+        color: #b6b6b6;
+    }
+
+    .stats .duration::after {
+        content: ' ms)';
+        color: #b6b6b6;
+    }
+
+    .high {
+        color: #00d4b4;
+    }
+    .medium {
+        color: #e87d0d;
+    }
+    .low {
+        color: #d4081a;
+    }
+    .terrible {
+        color: #d4081a;
+        font-weight: bold;
+    }
+
+    #files table {
+        width: 80%;
+        margin-top: 10px;
+        border-collapse: collapse;
+        border: 1px solid #cbcbcb;
+        color: #363636;
+        border-radius: 3px;
+    }
+
+    #files thead {
+        display: none;
+    }
+
+    table td.line,
+    table td.hits {
+        width: 20px;
+        background: #eaeaea;
+        text-align: center;
+        font-size: 11px;
+        padding: 0 10px;
+        color: #949494;
+    }
+
+    table td.hits {
+        width: 10px;
+        padding: 2px 5px;
+        color: rgba(0,0,0,.2);
+        background: #f0f0f0;
+    }
+
+    table td.sourcemaps {
+        width: 1%;
+        border-left: 1px solid #cbcbcb;
+        padding: 0 10px;
+    }
+
+    td.sourcemaps.file {
+        background: #f0f0f0;
+    }
+
+    tr.miss td.line,
+    tr.miss td.hits {
+        background: #e6c3c7;
+    }
+
+    tr.miss td {
+        background: #f8d5d8;
+    }
+
+    td.source {
+        padding-left: 15px;
+        line-height: 15px;
+        white-space: pre;
+        font: 12px monaco, monospace;
+    }
+
+    td.source div {
+        display: inline-block;
+    }
+
+    td.source div.true {
+        background: #bae8bf;
+    }
+
+    td.source div.false {
+        background: #e8e5ba;
+    }
+
+    td.source div.never {
+        background: #f8d5d8;
+    }
+
+    #tests {
+        padding: 60px;
+    }
+
+    #tests table {
+        width: 80%;
+        margin-top: 10px;
+        border-collapse: collapse;
+        border: 1px solid #cbcbcb;
+        color: #363636;
+        border-radius: 3px;
+    }
+
+    #tests thead {
+        background: #F5F5F5;
+    }
+
+    #tests tr {
+        border: 1px solid #ccc;
+    }
+
+    #tests td {
+        padding-left: 8px;
+    }
+
+    #tests .success:nth-child(2n) {
+        background: #F5F5F5;
+    }
+
+    #tests .failure  {
+        background: #FF9E9E;
+    }
+
+    #tests table .skipped  {
+        background: #AA82FF;
+    }
+
+    #tests .success {
+        color: #949494;
+    }
+
+    #tests .failure .test-title  {
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    #tests .stack {
+        margin-top: 4px;
+        padding-left: 15px;
+        margin-bottom: 12px;
+        font: 12px monaco, monospace;
+        white-space: pre;
+        line-height: 15px;
+    }
+
+    .hide {
+        position: absolute;
+        left: -9999em;
+    }
+
+    .show {
+        position: relative;
+    }
+
+    #filters {
+        width: 75%;
+        margin-top: 25px;
+    }
+
+    #filters label {
+        margin-right: 10px;
+    }
+    </style>
+  </head>
+  <body>
+  <div id="tests">
+      <h1>Test Report</h1>
+      <div class="stats high">
+          <div class="failures">0</div>
+          <div class="skipped">0</div>
+          <div class="test-count">2</div>
+          <div class="duration">45</div>
+      </div>
+      <div id="filters">
+          <input type="checkbox" checked="" onchange="filter(this)" value="success" id="show-success"><label for="show-success">Show Success</label></input>
+          <input type="checkbox" checked="" onchange="filter(this)" value="failure" id="show-failure"><label for="show-failure">Show Failure</label></input>
+          <input type="checkbox" checked="" onchange="filter(this)" value="Contacts" id="show-Contacts"><label for="show-Contacts">Contacts</label></input>
+      </div>
+      <table>
+          <thead>
+          <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Duration (ms)</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr class="show Contacts success">
+              <td class="test-id">1</td>
+              <td class="test-title">Contacts  lists all contacts
+                  
+              </td>
+              <td class="test-duration">40</td>
+          </tr>
+          <tr class="show Contacts success">
+              <td class="test-id">2</td>
+              <td class="test-title">Contacts  display a contact
+                  
+              </td>
+              <td class="test-duration">5</td>
+          </tr>
+          </tbody>
+      </table>
+  </div>
+
+    <div id="coverage">
+        <h1>Code Coverage Report</h1>
+        <div id="menu">
+            <li><a href="#tests">Test Report</a></li>
+            <li><a href="#coverage">Coverage Report</a></li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#knexfile.js"><span class="basename">knexfile.js</span></a>
+            </li>
+            <li>
+                <span class="cov medium">72.73</span>
+                <a href="#server.js"><span class="basename">server.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#config/bookshelf.js"><span class="dirname">config/</span><span class="basename">bookshelf.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#config/routes.js"><span class="dirname">config/</span><span class="basename">routes.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">81.82</span>
+                <a href="#config/settings.js"><span class="dirname">config/</span><span class="basename">settings.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#controllers/controllers.js"><span class="dirname">controllers/</span><span class="basename">controllers.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#models/models.js"><span class="dirname">models/</span><span class="basename">models.js</span></a>
+            </li>
+            <li>
+                <span class="cov high">100</span>
+                <a href="#utils/utils.js"><span class="dirname">utils/</span><span class="basename">utils.js</span></a>
+            </li>
+        </div>
+        <div class="stats high">
+            <div class="percentage">96.15%</div>
+            <div class="sloc">130</div>
+            <div class="hits">125</div>
+            <div class="misses">5</div>
+        </div>
+        <div id="files">
+            <div class="file">
+                <h2 id="knexfile.js">knexfile.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">62</div>
+                    <div class="hits">62</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits"></td>
+                            <td class="source">// Update with your config settings.</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits"></td>
+                            <td class="source">  test: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">    client: &#x27;sqlite3&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source">    connection: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">7</td>
+                            <td class="hits"></td>
+                            <td class="source">      filename: &#x27;./test.sqlite3&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source">    migrations: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">10</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/migrations&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">11</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">12</td>
+                            <td class="hits"></td>
+                            <td class="source">    seeds: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">13</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/seeds&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">14</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">15</td>
+                            <td class="hits"></td>
+                            <td class="source">  },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">16</td>
+                            <td class="hits"></td>
+                            <td class="source">  development: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">17</td>
+                            <td class="hits"></td>
+                            <td class="source">    client: &#x27;sqlite3&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">18</td>
+                            <td class="hits"></td>
+                            <td class="source">    connection: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">19</td>
+                            <td class="hits"></td>
+                            <td class="source">      filename: &#x27;./dev.sqlite3&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">20</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">21</td>
+                            <td class="hits"></td>
+                            <td class="source">    migrations: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">22</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/migrations&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">23</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">24</td>
+                            <td class="hits"></td>
+                            <td class="source">    seeds: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">25</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/seeds&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">26</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">27</td>
+                            <td class="hits"></td>
+                            <td class="source">  },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">28</td>
+                            <td class="hits"></td>
+                            <td class="source">  staging: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">29</td>
+                            <td class="hits"></td>
+                            <td class="source">    client: &#x27;postgresql&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">30</td>
+                            <td class="hits"></td>
+                            <td class="source">    connection: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">31</td>
+                            <td class="hits"></td>
+                            <td class="source">      database: &#x27;my_db&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">32</td>
+                            <td class="hits"></td>
+                            <td class="source">      user:     &#x27;username&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">33</td>
+                            <td class="hits"></td>
+                            <td class="source">      password: &#x27;password&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">34</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">35</td>
+                            <td class="hits"></td>
+                            <td class="source">    pool: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">36</td>
+                            <td class="hits"></td>
+                            <td class="source">      min: 2,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">37</td>
+                            <td class="hits"></td>
+                            <td class="source">      max: 10</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">38</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">39</td>
+                            <td class="hits"></td>
+                            <td class="source">    migrations: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">40</td>
+                            <td class="hits"></td>
+                            <td class="source">      tableName: &#x27;knex_migrations&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">41</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/migrations&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">42</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">43</td>
+                            <td class="hits"></td>
+                            <td class="source">    seeds: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">44</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/seeds&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">45</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">46</td>
+                            <td class="hits"></td>
+                            <td class="source">  },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">47</td>
+                            <td class="hits"></td>
+                            <td class="source">  production: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">48</td>
+                            <td class="hits"></td>
+                            <td class="source">    client: &#x27;postgresql&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">49</td>
+                            <td class="hits"></td>
+                            <td class="source">    connection: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">50</td>
+                            <td class="hits"></td>
+                            <td class="source">      database: &#x27;my_db&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">51</td>
+                            <td class="hits"></td>
+                            <td class="source">      user:     &#x27;username&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">52</td>
+                            <td class="hits"></td>
+                            <td class="source">      password: &#x27;password&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">53</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">54</td>
+                            <td class="hits"></td>
+                            <td class="source">    pool: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">55</td>
+                            <td class="hits"></td>
+                            <td class="source">      min: 2,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">56</td>
+                            <td class="hits"></td>
+                            <td class="source">      max: 10</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">57</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">58</td>
+                            <td class="hits"></td>
+                            <td class="source">    migrations: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">59</td>
+                            <td class="hits"></td>
+                            <td class="source">      tableName: &#x27;knex_migrations&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">60</td>
+                            <td class="hits"></td>
+                            <td class="source">      directory: &#x27;./db/migrations&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">61</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">62</td>
+                            <td class="hits"></td>
+                            <td class="source">  }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">63</td>
+                            <td class="hits"></td>
+                            <td class="source">};</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">64</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="server.js">server.js</h2>
+                <div class="stats medium">
+                    <div class="percentage">72.73%</div>
+                    <div class="sloc">11</div>
+                    <div class="hits">8</div>
+                    <div class="misses">3</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var Hapi = require(&#x27;hapi&#x27;),</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source">    config = require(&#x27;./config/settings&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits">1</td>
+                            <td class="source">var server = Hapi.createServer(&#x27;0.0.0.0&#x27;, config.port, config.hapi.options);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = server;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">7</td>
+                            <td class="hits"></td>
+                            <td class="source">// Add the server routes</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits">1</td>
+                            <td class="source">server.route(require(&#x27;./config/routes&#x27;));</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                            <tr class="chunks">
+                                <td class="line">10</td>
+                                <td class="hits"></td>
+                                <td class="source"><div>if (</div><div class="miss false">!module.parent</div><div>) {</div></td>
+                            </tr>
+                            <tr class="miss">
+                                <td class="line">11</td>
+                                <td class="hits"></td>
+                                <td class="source">	server.start(function() {</td>
+                            </tr>
+                            <tr class="miss">
+                                <td class="line">12</td>
+                                <td class="hits"></td>
+                                <td class="source">	    console.log(&#x27;Server running at:&#x27;, server.info.uri);</td>
+                            </tr>
+                        <tr class="hit">
+                            <td class="line">13</td>
+                            <td class="hits"></td>
+                            <td class="source">	});</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">14</td>
+                            <td class="hits"></td>
+                            <td class="source">}</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">15</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="config/bookshelf.js">config/bookshelf.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">5</div>
+                    <div class="hits">5</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var knexConfig = require(&#x27;../knexfile&#x27;); </td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits">1</td>
+                            <td class="source">var settings = require(&#x27;./settings&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits">1</td>
+                            <td class="source">var knex = require(&#x27;knex&#x27;)(knexConfig[settings.environment]);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits">1</td>
+                            <td class="source">var bookshelf = require(&#x27;bookshelf&#x27;)(knex);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = bookshelf;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="config/routes.js">config/routes.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">11</div>
+                    <div class="hits">11</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var server = require(&#x27;../server&#x27;),</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source">    controllers = require(&#x27;../controllers/controllers&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = [{</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">    method: &#x27;GET&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source">    path: &#x27;/api/contacts&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">7</td>
+                            <td class="hits"></td>
+                            <td class="source">    config: controllers.contacts</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits"></td>
+                            <td class="source">}, {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source">    method: &#x27;GET&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">10</td>
+                            <td class="hits"></td>
+                            <td class="source">    path: &#x27;/api/contacts/{id}&#x27;,</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">11</td>
+                            <td class="hits"></td>
+                            <td class="source">    config: controllers.contact</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">12</td>
+                            <td class="hits"></td>
+                            <td class="source">}];</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">13</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="config/settings.js">config/settings.js</h2>
+                <div class="stats high">
+                    <div class="percentage">81.82%</div>
+                    <div class="sloc">11</div>
+                    <div class="hits">9</div>
+                    <div class="misses">2</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var path = require(&#x27;path&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits"></td>
+                            <td class="source">// Defaults that you can access when you require this config.</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">    rootPath: path.normalize(__dirname + &#x27;/..&#x27;),</td>
+                        </tr>
+                            <tr class="chunks">
+                                <td class="line">6</td>
+                                <td class="hits"></td>
+                                <td class="source"><div>    port: </div><div class="miss false">parseInt(process.env.PORT, 10)</div><div> || 3000,</div></td>
+                            </tr>
+                            <tr class="chunks">
+                                <td class="line">7</td>
+                                <td class="hits"></td>
+                                <td class="source"><div>    environment: </div><div class="miss true">process.env.NODE_ENV</div><div> || </div><div class="miss never">&#x27;development&#x27;</div><div>, </div></td>
+                            </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits"></td>
+                            <td class="source">    hapi: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source">        options: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">10</td>
+                            <td class="hits"></td>
+                            <td class="source">        }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">11</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">12</td>
+                            <td class="hits"></td>
+                            <td class="source">}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="controllers/controllers.js">controllers/controllers.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">18</div>
+                    <div class="hits">18</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var models = require(&#x27;../models/models&#x27;),</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source">    utils = require(&#x27;../utils/utils&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">    contacts: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source">        handler: function(request, reply) {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">7</td>
+                            <td class="hits">1</td>
+                            <td class="source">            models.Contact.fetchAll().then(function(contacts) {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits">1</td>
+                            <td class="source">                reply(utils.formatJson(&#x27;contacts&#x27;, contacts));</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source">            });</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">10</td>
+                            <td class="hits"></td>
+                            <td class="source">        }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">11</td>
+                            <td class="hits"></td>
+                            <td class="source">    },</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">12</td>
+                            <td class="hits"></td>
+                            <td class="source">    contact: {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">13</td>
+                            <td class="hits"></td>
+                            <td class="source">        handler: function(request, reply) {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">14</td>
+                            <td class="hits">1</td>
+                            <td class="source">            new models.Contact({id: request.params.id}).fetch().then(function(contact) {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">15</td>
+                            <td class="hits">1</td>
+                            <td class="source">                reply(utils.formatJson(&#x27;contact&#x27;, contact));</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">16</td>
+                            <td class="hits"></td>
+                            <td class="source">            });</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">17</td>
+                            <td class="hits"></td>
+                            <td class="source">        }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">18</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">19</td>
+                            <td class="hits"></td>
+                            <td class="source">};</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">20</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="models/models.js">models/models.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">7</div>
+                    <div class="hits">7</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">var bookshelf = require(&#x27;../config/bookshelf&#x27;);</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits">1</td>
+                            <td class="source">var Contact = bookshelf.Model.extend({</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits"></td>
+                            <td class="source">    tableName: &#x27;contacts&#x27;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">});</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">7</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">8</td>
+                            <td class="hits"></td>
+                            <td class="source">	Contact: Contact</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">9</td>
+                            <td class="hits"></td>
+                            <td class="source">}</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">10</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="file">
+                <h2 id="utils/utils.js">utils/utils.js</h2>
+                <div class="stats high">
+                    <div class="percentage">100%</div>
+                    <div class="sloc">5</div>
+                    <div class="hits">5</div>
+                    <div class="misses">0</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Hits</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hit">
+                            <td class="line">1</td>
+                            <td class="hits">1</td>
+                            <td class="source">module.exports = {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">2</td>
+                            <td class="hits"></td>
+                            <td class="source">    formatJson: function(root, json) {</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">3</td>
+                            <td class="hits">2</td>
+                            <td class="source">        return &#x27;{&quot;&#x27; + root + &#x27;&quot;:&#x27; + JSON.stringify(json) + &#x27;}&#x27;;</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">4</td>
+                            <td class="hits"></td>
+                            <td class="source">    }</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">5</td>
+                            <td class="hits"></td>
+                            <td class="source">}</td>
+                        </tr>
+                        <tr class="hit">
+                            <td class="line">6</td>
+                            <td class="hits"></td>
+                            <td class="source"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
