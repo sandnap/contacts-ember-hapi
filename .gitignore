@@ -19,3 +19,5 @@ libpeerconnection.log
 npm-debug.log
 testem.log
 .DS_Store
+/server/dev.sqlite3
+/server/test.sqlite3
