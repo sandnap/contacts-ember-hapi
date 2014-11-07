@@ -1,5 +1,6 @@
 var models = require('../models/models'),
     moment = require('moment'),
+    validators = require('../validators/validators'),
     utils = require('../utils/utils');
 
 module.exports = {
@@ -24,7 +25,10 @@ module.exports = {
             new models.Contact(request.payload.contact).save().then(function(contact) {
                 reply(utils.formatJson('contact', contact));
             });
-        }
+        },
+        validate: {
+            payload: validators
+        } 
     },
     contactUpdate: {
         handler: function(request, reply) {
@@ -32,7 +36,10 @@ module.exports = {
             new models.Contact(request.payload.contact).save().then(function(contact) {
                 reply(utils.formatJson('contact', contact));
             });
-        }
+        },
+        validate: {
+            payload: validators
+        } 
     },
     contactDelete: {
         handler: function(request, reply) {

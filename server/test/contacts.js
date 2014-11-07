@@ -71,7 +71,7 @@ describe('Contacts', function() {
 	var localContact = {
 		contact: {
 			first_name: 'Jack',
-			middle_initial: null,
+			middle_initial: undefined,
 			last_name: 'Johnson',
 			title: 'President',
 			phone_number: '(555) 222-2034',
@@ -93,13 +93,16 @@ describe('Contacts', function() {
 	    server.inject(options, function(response) {
 	        var result = response.result;
 	 
+	 		if (response.statusCode === 400) {
+	 			console.log(result);
+	 		}
 	        expect(response.statusCode).to.equal(200);
 	        var contact = JSON.parse(result);
 	        expect(contact).to.be.instanceof(Object);
 	        // Set our localContact variable for use in other tests 
 	        localContact = contact;
 	        expect(contact.contact['first_name']).to.equal('Jack');
-	        expect(contact.contact['middle_initial']).to.equal(null);
+	        expect(contact.contact['middle_initial']).to.equal(undefined);
 	        expect(contact.contact['last_name']).to.equal('Johnson');
 	        expect(contact.contact['phone_number']).to.equal('(555) 222-2034');
 
@@ -152,13 +155,16 @@ describe('Contacts', function() {
 	    server.inject(options, function(response) {
 	        var result = response.result;
 	 
+	 		if (response.statusCode === 400) {
+	 			console.log(result);
+	 		}
 	        expect(response.statusCode).to.equal(200);
 	        var contact = JSON.parse(result);
 	        expect(contact).to.be.instanceof(Object);
 	        // Set our localContact variable for use in other tests 
 	        localContact = contact;
 	        expect(contact.contact['first_name']).to.equal('Billy');
-	        expect(contact.contact['middle_initial']).to.equal(null);
+	        expect(contact.contact['middle_initial']).to.equal(undefined);
 	        expect(contact.contact['last_name']).to.equal('Smith');
 	        expect(contact.contact['phone_number']).to.equal('(555) 111-2222');
 
@@ -206,6 +212,87 @@ describe('Contacts', function() {
 		 
 		        done();
 		    });
+	    });
+	});
+
+	it("create a contact fail first_name min length validation", function(done) {
+		localContact.contact['first_name'] = 'J';
+
+	    var options = {
+	        method: "POST",
+	        url: "/api/contacts",
+	        payload: JSON.stringify(localContact)
+	    };
+	 
+	    server.inject(options, function(response) {
+	        var result = response.result;
+	 
+	        expect(response.statusCode).to.equal(400);
+	        expect(result.validation.keys[0]).to.equal('contact.first_name');
+
+	        done();
+	    });
+	});
+
+	it("create a contact fail last_name required validation", function(done) {
+		localContact.contact['first_name'] = 'Jack';
+		localContact.contact['last_name'] = undefined;
+
+	    var options = {
+	        method: "POST",
+	        url: "/api/contacts",
+	        payload: JSON.stringify(localContact)
+	    };
+	 
+	    server.inject(options, function(response) {
+	        var result = response.result;
+	 
+	        expect(response.statusCode).to.equal(400);
+	        expect(result.validation.keys[0]).to.equal('contact.last_name');
+	        expect(result.message).to.equal('last_name is required');
+
+	        done();
+	    });
+	});
+
+	it("create a contact fail middle_initial max length validation", function(done) {
+		localContact.contact['last_name'] = 'Johnson';
+		localContact.contact['middle_initial'] = 'Long';
+
+	    var options = {
+	        method: "POST",
+	        url: "/api/contacts",
+	        payload: JSON.stringify(localContact)
+	    };
+	 
+	    server.inject(options, function(response) {
+	        var result = response.result;
+	 
+	        expect(response.statusCode).to.equal(400);
+	        expect(result.validation.keys[0]).to.equal('contact.middle_initial');
+
+	        done();
+	    });
+	});
+
+	it("create a contact fail email format validation", function(done) {
+		localContact.contact['middle_initial'] = undefined;
+		localContact.contact['email'] = 'invalidemail';
+
+	    var options = {
+	        method: "POST",
+	        url: "/api/contacts",
+	        payload: JSON.stringify(localContact)
+	    };
+	 
+	    server.inject(options, function(response) {
+	        var result = response.result;
+	 
+	        expect(response.statusCode).to.equal(400);
+	        expect(result.validation.keys[0]).to.equal('contact.email');
+	        expect(result.message).to.equal('email must be a valid email');
+
+	        done();
 	    });
 	});
 });
