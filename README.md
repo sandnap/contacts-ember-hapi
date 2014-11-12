@@ -23,7 +23,7 @@ This application makes use of [Ember CLI](http://www.ember-cli.com/) on the fron
 
    		$ knex migrate:latest
 
-	* Insert seed data
+   * Insert seed data
 
 		$ knex seed:run
 
