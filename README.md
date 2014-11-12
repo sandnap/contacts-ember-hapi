@@ -9,6 +9,12 @@ This application makes use of [Ember CLI](http://www.ember-cli.com/) on the fron
    * You must have Node.js and NPM installed on your computer.  If not you will need to follow the  installation guide for your platform at http://nodejs.org/.
    * You must have Ember CLI installed globally.  If not you can follow the setup guide at http://www.ember-cli.com/#getting-started.
 
+## Installation
+
+   * Clone this project or download the archive file and unzip it
+   * In a terminal navigate to the server directory and run `npm install`
+   * In a terminal navigate to the client directory and run `npm install` followed by `bower install`
+
 ## Starting Hapi
 
 In a terminal execute the following from within the server directory
