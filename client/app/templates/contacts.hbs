@@ -1,6 +1,3 @@
-<ul>
-{{#each contact in model}}
-  <li>{{#link-to 'contact' contact}}{{contact.firstName}}{{/link-to}}</li>
-{{/each}}
-</ul>
+{{filter-table content=model columnNum=2 showCheckboxes=false filterField='fullName'
+				bodyTemplate="table-body" headerTemplate="table-header"}}
 {{outlet}}

@@ -7,21 +7,14 @@ import config from './config/environment';
 Ember.MODEL_FACTORY_INJECTIONS = true;
 
 var adapter;
-// var env = config.environment; 
-// if (env === 'development' || env === 'test') {
-//   adapter = DS.FixtureAdapter.extend({
-//     latency: 500
-//   });
-// } else {
-  adapter = DS.ActiveModelAdapter.extend({
-    // pathForType: function(type) {
-    //   return 'form_hero/' + type;
-    // },
-    // find: function(store, type, id) {
-    //   return this.ajax(this.buildURL(type.typeKey, id) + '/edit', 'GET');
-    // }
+var env = config.environment; 
+if (env === 'test') {
+  adapter = DS.FixtureAdapter.extend({
+    latency: 500
   });
-// }
+} else {
+  adapter = DS.ActiveModelAdapter;
+}
 
 var App = Ember.Application.extend({
   modulePrefix: config.modulePrefix,
