@@ -39,4 +39,4 @@ In a terminal execute the following from within the client directory
 
 			$ ember server -proxy http://localhost:3000/api
 
-You can view the application at http://localhost:4200/contacts and the Ember CLI tests at http://localhost:4200/tests. To run the Hapi API tests run `npm test` while in the server directory.
+You can view the application at [http://localhost:4200/contacts](http://localhost:4200/contacts) and the Ember CLI tests at [http://localhost:4200/tests](http://localhost:4200/tests). To run the Hapi API tests run `npm test` while in the server directory.
