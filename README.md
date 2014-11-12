@@ -14,6 +14,18 @@ This application makes use of [Ember CLI](http://www.ember-cli.com/) on the fron
    * Clone this project or download the archive file and unzip it
    * In a terminal navigate to the server directory and run `npm install`
    * In a terminal navigate to the client directory and run `npm install` followed by `bower install`
+   * Install the Knex CLI by executing the following commands in the server directory
+
+   		$ npm install knex -g
+		$ knex init
+
+   * Run the database migrations from the server directory
+
+   		$ knex migrate:latest
+
+	* Insert seed data
+
+		$ knex seed:run
 
 ## Starting Hapi
 
