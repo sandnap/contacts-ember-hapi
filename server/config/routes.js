@@ -1,5 +1,4 @@
-var server = require('../server'),
-    controllers = require('../controllers/controllers');
+var controllers = require('../controllers/controllers');
 
 module.exports = [{
     method: 'GET',
