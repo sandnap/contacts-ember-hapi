@@ -17,7 +17,6 @@ This application makes use of [Ember CLI](http://www.ember-cli.com/) on the fron
    * Install the Knex CLI by executing the following commands in the server directory
 
    		$ npm install knex -g
-		$ knex init
 
    * Run the database migrations from the server directory
 
