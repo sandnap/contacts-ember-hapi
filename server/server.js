@@ -1,7 +1,8 @@
 var Hapi = require('hapi'),
     config = require('./config/settings');
 
-var server = Hapi.createServer('0.0.0.0', config.port, config.hapi.options);
+var server = new Hapi.Server();
+server.connection({host: '0.0.0.0', port: config.port});
 module.exports = server;
 
 // Add the server routes

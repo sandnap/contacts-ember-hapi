@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "bookshelf": "^0.7.7",
-    "hapi": "^6.11.0",
-    "joi": "^4.7.0",
+    "hapi": "^8.0.0",
+    "joi": "^5.1.0",
     "knex": "^0.7.3",
     "moment": "^2.8.3",
     "sqlite3": "^3.0.2"
